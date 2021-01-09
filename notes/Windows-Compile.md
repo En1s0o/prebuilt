@@ -72,6 +72,16 @@
   CROSS_COMPILE="x86_64-w64-mingw32-" ./Configure mingw64 no-asm shared no-unit-test --prefix=/home/eniso/prebuilt/openssl-1.1.1g/build
   ```
 
+- pjproject
+
+  编译此库，需要切换代码，使用 [git-source]pjproject.tar.gz，里面包含很多修改。其中一条记录，就是去掉版本号，因为 pjproject 编译出来的动态库是带版本号的（例如：libpj.dll.2），一般 Windows 不搞这套。
+
+  ```shell
+  ./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/out --enable-shared --disable-libwebrtc --with-ssl=${OUT_DIR}/${LIB_NAME_OPENSSL}
+  ```
+
+  由于 pjproject 在 Linux 下交叉编译 Windows 出现各种问题，所以源码是被修改过的。同时还对 sdp 添加 y 字段支持。由于主开发平台不是 Windows，所以这里并没有将前缀 lib 去掉。
+
 
 
 
