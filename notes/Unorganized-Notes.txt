@@ -1,0 +1,456 @@
+windows 去掉 lib 前缀
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
+set(CMAKE_SHARED_MODULE_PREFIX "")
+
+zlib
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+tinyxml2
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+yaml
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_SHARED_LIBS=TRUE \
+-DYAML_CPP_BUILD_TESTS=FALSE \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+re2
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_SHARED_LIBS=TRUE \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+
+openssl
+Windows
+CROSS_COMPILE="x86_64-w64-mingw32-" ./Configure mingw64 no-asm shared no-unit-test --prefix=/home/eniso/prebuilt/openssl-1.1.1g/build
+
+Linux
+./Configure --prefix=/home/eniso/prebuilt/openssl-1.1.1g/build linux-x86_64 no-asm no-unit-test shared -Wl,-rpath,'"\$$ORIGIN:\$$ORIGIN/lib:\$$ORIGIN/../lib"'
+
+
+libevent
+1、修改 CMakeLists.txt
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) # 这里是 TRUE，是因为清单编写不规范，无法正确修改 RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+2、生成 Makefile
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DEVENT__DISABLE_BENCHMARK=TRUE \
+-DEVENT__DISABLE_DEBUG_MODE=TRUE \
+-DEVENT__DISABLE_REGRESS=TRUE \
+-DEVENT__DISABLE_SAMPLES=TRUE \
+-DEVENT__DISABLE_TESTS=TRUE \
+-DEVENT__ENABLE_GCC_HARDENING=TRUE \
+-DEVENT__LIBRARY_TYPE=shared \
+-DOPENSSL_ROOT_DIR=/home/eniso/prebuilt/openssl-1.1.1g/build
+3、修改 vim ./CMakeFiles/event_openssl_shared.dir/link.txt
+删掉 rpath 的 /home/eniso/prebuilt/openssl-1.1.1g/build/lib
+4、编译，编译完成后，取出 libevent 相关库，再执行 make install 得到头文件和 cmake
+
+
+hiredis
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DDISABLE_TESTS=TRUE \
+-DENABLE_SSL=TRUE \
+-DOPENSSL_ROOT_DIR=/home/eniso/prebuilt/openssl-1.1.1g/build
+
+
+curl
+1、
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) # 这里是 TRUE，是因为清单编写不规范，无法正确修改 RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+2、
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DBUILD_CURL_EXE=TRUE \
+-DBUILD_SHARED_LIBS=TRUE \
+-DCMAKE_USE_OPENSSL=TRUE \
+-DCURL_ZLIB=TRUE \
+-DENABLE_ARES=TRUE \
+-DOPENSSL_ROOT_DIR=/home/eniso/prebuilt/openssl-1.1.1g/build \
+-DCARES_INCLUDE_DIR=/home/eniso/prebuilt/grpc-1.31.1/out/include \
+-DCARES_LIBRARY=/home/eniso/prebuilt/grpc-1.31.1/out/lib/libcares.so \
+-DZLIB_INCLUDE_DIR=/home/eniso/prebuilt/zlib-1.2.11/build/include \
+-DZLIB_LIBRARY_DEBUG=/home/eniso/prebuilt/zlib-1.2.11/build/lib/libz.so \
+-DZLIB_LIBRARY_RELEASE=/home/eniso/prebuilt/zlib-1.2.11/build/lib/libz.so
+3、修改
+vim ./src/CMakeFiles/curl.dir/link.txt（这个是 curl 的 rpath）
+vim ./lib/CMakeFiles/libcurl.dir/link.txt（这个是 libcurl 的 rpath）
+删除掉 cares 、zlib、openssl 的 rpath
+4、编译，编译完成后，去除 curl 和 libcurl，再执行 make install 得到头文件和 cmake
+
+
+》》》重要
+
+错误：gcc.exe: error: /wd4996: No such file or directory
+删除类似下面的代码
+if(WIN32)
+
+  add_compile_options(
+    /wd4018
+    /wd4996
+    /wd4244
+    /wd4715
+    /wd4065
+    /wd4800
+    /wd4355
+    /wd4267
+    /wd4506
+    /wd4146
+  )
+
+endif()
+
+
+mariadb-connector-c
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DWITH_SSL=ON \
+-DOPENSSL_ROOT_DIR=/home/eniso/prebuilt/openssl-1.1.1g/build \
+-DCURL_INCLUDE_DIR=/home/eniso/prebuilt/curl-7.72.0/build/include \
+-DCURL_LIBRARY_DEBUG=/home/eniso/prebuilt/curl-7.72.0/build/lib/libcurl.so \
+-DCURL_LIBRARY_RELEASE=/home/eniso/prebuilt/curl-7.72.0/build/lib/libcurl.so
+
+
+
+sqlpp11
+1、先编译 sqlpp11-connector-mysql-0.29
+需要指定 sqlpp11 头文件路径 和 date 头文件路径
+另外，也可以修改一下 cmake/FindMySql.cmake，把 MYSQL 改为 MySql
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DUSE_MARIADB=1 \
+-DDATE_INCLUDE_DIR=/home/eniso/prebuilt/date-3.0.0/include \
+-DSQLPP11_INCLUDE_DIR=/home/eniso/prebuilt/sqlpp11-0.60/include \
+-DMYSQL_INCLUDE_DIR=/home/eniso/prebuilt/mariadb-connector-c-3.1.10/build/include/mariadb \
+-DMYSQL_LIBRARY=/home/eniso/prebuilt/mariadb-connector-c-3.1.10/build/lib/mariadb/libmariadb.so
+
+2、编译 sqlpp11，本质是编译 date 静态库，然后生成 sqlpp11 和 date 的头文件
+注意：默认情况下 sqlpp11 会去下载 date 代码，也可以配置 cmake 不让这个过程发生
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DBUILD_TZ_LIB=TRUE \
+-DCURL_INCLUDE_DIR=/home/eniso/prebuilt/curl-7.72.0/build/include \
+-DCURL_LIBRARY_DEBUG=/home/eniso/prebuilt/curl-7.72.0/build/lib/libcurl.so \
+-DCURL_LIBRARY_RELEASE=/home/eniso/prebuilt/curl-7.72.0/build/lib/libcurl.so
+
+3、将 1 和 2 融合在一起，如果是使用 PostgreSQL 也是一样
+如果要完整使用，还需要 Boost，一般简单使用可以忽略
+
+
+
+protobuf 到cmakelists修改zlib配置
+cmake ../cmake/ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_SHARED_LIBS=TRUE \
+-Dprotobuf_BUILD_SHARED_LIBS=TRUE \
+-Dprotobuf_WITH_ZLIB=TRUE \
+-Dprotobuf_BUILD_TESTS=OFF \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+如下：
+set(_protobuf_FIND_ZLIB)
+if (protobuf_WITH_ZLIB)
+  #find_package(ZLIB)                                          这个地方
+  find_package(ZLIB REQUIRED
+                CONFIGS zlib-config.cmake
+                PATHS /home/eniso/prebuilt/zlib-1.2.11/build/lib/cmake/zlib)
+  if (ZLIB_FOUND)
+    set(HAVE_ZLIB 1)
+    # FindZLIB module define ZLIB_INCLUDE_DIRS variable
+    # Set ZLIB_INCLUDE_DIRECTORIES for compatible
+    #set(ZLIB_INCLUDE_DIRECTORIES ${ZLIB_INCLUDE_DIRECTORIES} ${ZLIB_INCLUDE_DIRS})
+
+                                                                             这个地方
+    set(ZLIB_INCLUDE_DIRECTORIES /home/eniso/prebuilt/zlib-1.2.11/build/include)
+    # Using imported target if exists
+    if (TARGET zlib)
+      set(ZLIB_LIBRARIES zlib)
+      set(_protobuf_FIND_ZLIB "if(NOT ZLIB_FOUND)\n  find_package(zlib)\nendif()")
+    endif (TARGET zlib)
+  else (ZLIB_FOUND)
+    set(HAVE_ZLIB 0)
+    # Explicitly set these to empty (override NOT_FOUND) so cmake doesn't
+    # complain when we use them later.
+    set(ZLIB_INCLUDE_DIRECTORIES)
+    set(ZLIB_LIBRARIES)
+  endif (ZLIB_FOUND)
+endif (protobuf_WITH_ZLIB)
+
+
+修改：为了防止自动添加 zlib 到 RPATH，所以不需要修改 CMakeLists.txt 的 CMAKE_INSTALL_RPATH
+vim cmake/install.cmake
+PROPERTY INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib"
+
+
+
+abseil
+可能需要在 CMakeLists.txt 添加
+add_compile_options(-std=c++11 -maes -mpclmul)
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_SHARED_LIBS=TRUE \
+-DABSL_BUILD_DLL=TRUE \
+-DABSL_ENABLE_INSTALL=TRUE \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+重要：如果是在 Linux 编译单个so，需要修改dll，不要让它进入宏定义
+    #PRIVATE
+      #ABSL_BUILD_DLL
+      #NOMINMAX
+还有 helper 里面的
+      #ABSL_CONSUME_DLL
+
+
+
+c-ares
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_SHARED_LIBS=TRUE \
+-DCARES_SHARED=TRUE \
+-DCARES_STATIC=TRUE \
+-DCARES_STATIC_PIC=TRUE \
+-DCARES_INSTALL=TRUE \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+
+
+grpc
+添加
+set(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+需要修改一处代码
+vim src/core/lib/debug/trace.cc
+void TraceFlagList::Add(TraceFlag* flag) {
+>>> 从这里开始
+  for (TraceFlag* t = root_tracer_; t != nullptr; t = t->next_tracer_) {     
+    if (t == flag) {
+      return;
+    }
+  }
+<<<< 到这里结束
+  flag->next_tracer_ = root_tracer_;
+  root_tracer_ = flag;
+}
+
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_SHARED_LIBS=TRUE \
+-DBUILD_TESTING=FALSE \
+-DCARES_BUILD_TOOLS=TRUE \
+-DCARES_SHARED=TRUE \
+-DCARES_STATIC=TRUE \
+-DCARES_STATIC_PIC=TRUE \
+-DABSL_ENABLE_INSTALL=TRUE \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DINSTALL_BIN_DIR=$(pwd)/bin \
+-DINSTALL_INC_DIR=$(pwd)/include \
+-DINSTALL_LIB_DIR=$(pwd)/lib \
+-DINSTALL_MAN_DIR=$(pwd)/share/man \
+-DINSTALL_PKGCONFIG_DIR=$(pwd)/lib/pkgconfig \
+-DOPENSSL_ROOT_DIR=/home/eniso/prebuilt/grpc-1.31.1/third_party/openssl \
+-DProtobuf_DIR=/home/eniso/prebuilt/grpc-1.31.1/third_party/protobuf/lib/cmake/protobuf \
+-DZLIB_DIR=/home/eniso/prebuilt/grpc-1.31.1/third_party/zlib \
+-Dabsl_DIR=/home/eniso/prebuilt/grpc-1.31.1/third_party/abseil-cpp \
+-DgRPC_ABSL_PROVIDER=package \
+-DgRPC_BACKWARDS_COMPATIBILITY_MODE=TRUE \
+-DgRPC_BUILD_CODEGEN=FALSE \
+-DgRPC_CARES_PROVIDER=module \
+-DgRPC_INSTALL=TRUE \
+-DgRPC_PROTOBUF_PACKAGE_TYPE=CONFIG \
+-DgRPC_PROTOBUF_PROVIDER=package \
+-DgRPC_RE2_PROVIDER=package \
+-DgRPC_SSL_PROVIDER=package \
+-DgRPC_USE_PROTO_LITE=FALSE \
+-DgRPC_ZLIB_PROVIDER=package \
+-Dre2_DIR=/home/eniso/prebuilt/grpc-1.31.1/third_party/re2/lib/cmake/re2
+
+
+
+
+# 如果需要编译工具，可以把代码解压到third_party，然后使用下面的方式配置
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DBUILD_TESTING=FALSE \
+-DCARES_BUILD_TOOLS=TRUE \
+-DCARES_STATIC=TRUE \
+-DCARES_STATIC_PIC=TRUE \
+-DABSL_ENABLE_INSTALL=TRUE \
+-DCMAKE_INSTALL_PREFIX=$(pwd) \
+-DINSTALL_BIN_DIR=$(pwd)/bin \
+-DINSTALL_INC_DIR=$(pwd)/include \
+-DINSTALL_LIB_DIR=$(pwd)/lib \
+-DINSTALL_MAN_DIR=$(pwd)/share/man \
+-DINSTALL_PKGCONFIG_DIR=$(pwd)/lib/pkgconfig \
+-DOPENSSL_ROOT_DIR=/home/eniso/prebuilt/grpc-1.31.1/third_party/openssl \
+-DgRPC_ABSL_PROVIDER=module \
+-DgRPC_BACKWARDS_COMPATIBILITY_MODE=TRUE \
+-DgRPC_BUILD_CODEGEN=TRUE \
+-DgRPC_BUILD_GRPC_CPP_PLUGIN=TRUE \
+-DgRPC_CARES_PROVIDER=module \
+-DgRPC_INSTALL=TRUE \
+-DgRPC_PROTOBUF_PACKAGE_TYPE=module \
+-DgRPC_PROTOBUF_PROVIDER=module \
+-DgRPC_RE2_PROVIDER=module \
+-DgRPC_SSL_PROVIDER=package \
+-DgRPC_USE_PROTO_LITE=FALSE \
+-DgRPC_ZLIB_PROVIDER=module 
+
+
+
+umGBS
+cmake ../ \
+-DCMAKE_BACKWARDS_COMPATIBILITY=2.6 \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_INSTALL_PREFIX=$(pwd)
+
+
+
+       Which DNS resolution library do you want to use?
+       Valid values are: [resip-ares, c-ares]
+
+autoreconf --install
+
+./configure --enable-shared --with-c-ares \
+LDFLAGS="-L/home/eniso/prebuilt/c-ares-1.16.1/build/lib" \
+CXXFLAGS="-I/home/eniso/prebuilt/c-ares-1.16.1/build/include" 
+
+
+./configure --enable-shared --enable-ipv6 --enable-dtls --with-ssl=/home/eniso/prebuilt/openssl-1.1.1g/build --prefix=/home/eniso/prebuilt/resiprocate/out
+
+./configure --enable-shared --enable-ipv6 --enable-dtls --with-ssl=/home/eniso/prebuilt/openssl-1.1.1g/build --prefix=/home/eniso/prebuilt/resiprocate/out
+
+./configure --host=x86_64-w64-mingw32 --with-tfm=no --with-apps=no CPPFLAGS="-DUSE___UUIDOF=0 -DNO_IPHLPAPI" \
+--enable-shared --with-tfm=no --without-tfm --with-apps=no --without-apps \
+--enable-shared --enable-ipv6 --enable-dtls --with-ssl=/home/eniso/prebuilt/openssl-1.1.1g/build --prefix=/home/eniso/prebuilt/openssl
+
+CXXFLAGS="-DUSE_CARES"
+--with-c-ares 
+--ares-prefix="..."
+--cares-headers=/home/eniso/prebuilt/c-ares-1.16.1/build/include
+--cares-libs=/home/eniso/prebuilt/c-ares-1.16.1/build/lib
+--with-ssl-location=/home/eniso/prebuilt/openssl-1.1.1g/build
+CPPFLAGS="-DNDEBUG"
+
+
+./configure --host=x86_64-w64-mingw32 --enable-shared 
+./configure --host=x86_64-w64-mingw32 --enable-shared --with-c-ares \
+LDFLAGS="-L/home/eniso/prebuilt/c-ares/lib" \
+CXXFLAGS="-I/home/eniso/prebuilt/c-ares/include" 
+
+
+patchelf --set-rpath '$ORIGIN:$ORIGIN/lib:$ORIGIN/../lib' libdum-1.12.so
+
+
+libeXosip2 编译
+1、先编译好 openssl
+2、编译 libosip2
+3、将 openssl libosip2 生成的目录拷贝到 $(pwd)/out
+CC=x86_64-w64-mingw32-gcc ./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/out
+
+注意：libosip2 和 libeXosip2 需要做如下修改
+#define HAVE_STRUCT_TIMESPEC 1
+//#define HAVE_PTHREAD 1
+//#define HAVE_PTHREAD_PRIO_INHERIT 1
+//#define HAVE_SEMAPHORE_H 1
+
+
+pjsip::pjsua 
+pjsip::pjsip-ua 
+pjsip::pjsip-simple
+pjsip::pjsip
+pjsip::pjmedia-videodev 
+pjsip::pjmedia-audiodev 
+pjsip::pjmedia-codec 
+pjsip::pjmedia 
+pjsip::srtp 
+pjsip::pjlib-util 
+pjsip::pj
+
+Linux
+由于以下命令配置一直得不到正确结果
+./configure --prefix=$(pwd)/out --enable-shared --disable-libwebrtc LDFLAGS='-Wl,-rpath,"$$ORIGIN:$$ORIGIN/lib:$$ORIGIN/../lib"'
+所以，直接修改，加上 rpath
+vim build/rules.mak
+SHLIB_OPT := -shared -Wl,-rpath,"\$$ORIGIN:\$$ORIGIN/lib:\$$ORIGIN/../lib" -Wl,-soname,$(SHLIB)
+
+vim pjlib/include/pj/config_site.h
+#define OPENSSL
+
+./configure --prefix=$(pwd)/out --enable-shared --disable-libwebrtc --with-ssl=/home/eniso/prebuilt/openssl-1.1.1g/build
+make dep
+make -j8
+
+
+Windows
+./configure --host=x86_64-w64-mingw32 --prefix=$(pwd)/out --enable-shared --disable-libwebrtc
+
+vim build.mak
+-DPJ_AUTOCONF=1
+
+vim pjlib/include/pj/compat/os_auto.h
+#define PJ_WIN64 1
+#define PJ_WIN32_WINNT 0x0600
+
+vim pjlib/src/pj/os_time_common.c
+#if (!defined(PJ_WIN32) || PJ_WIN32==0) && (!defined(PJ_WIN64) || PJ_WIN64==0)
+
+vim pjmedia/src/pjmedia-audiodev/wmme_dev.c +220
+#include <guiddef.h>
+#include <functiondiscoverykeys_devpkey.h>
+
+
+
+debug
+编译 binutils-2.35
+./configure --prefix=$(pwd)/out --enable-host-shared --enable-shared --with-pic
+./configure --prefix=$(pwd)/out --disable-nls --disable-multilib --enable-host-shared --enable-shared --with-pic 
+./configure --host=x86_64-w64-mingw32-gcc --target=x86_64-w64-mingw32-gcc  --disable-multilib --prefix=$(pwd)/out --enable-host-shared --enable-shared --with-pic
+
+去掉冗余打印 BFD: DWARF error: could not find variable specification at offset：
+vim bfd/dwarf2.c +3381，删除打印
+
+
