@@ -1,0 +1,329 @@
+diff -uprN abseil-cpp-20200923.2-org/absl/copts/AbseilConfigureCopts.cmake abseil-cpp-20200923.2-new/absl/copts/AbseilConfigureCopts.cmake
+--- abseil-cpp-20200923.2-org/absl/copts/AbseilConfigureCopts.cmake	2020-10-21 05:32:42.000000000 -0700
++++ abseil-cpp-20200923.2-new/absl/copts/AbseilConfigureCopts.cmake	2020-11-24 23:14:17.000000000 -0800
+@@ -9,7 +9,7 @@ if (BUILD_SHARED_LIBS AND MSVC)
+   set(ABSL_BUILD_DLL TRUE)
+   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ else()
+-  set(ABSL_BUILD_DLL FALSE)
++  set(ABSL_BUILD_DLL TRUE)
+ endif()
+ 
+ if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64|amd64|AMD64")
+diff -uprN abseil-cpp-20200923.2-org/CMake/AbseilDll.cmake abseil-cpp-20200923.2-new/CMake/AbseilDll.cmake
+--- abseil-cpp-20200923.2-org/CMake/AbseilDll.cmake	2020-10-21 05:32:42.000000000 -0700
++++ abseil-cpp-20200923.2-new/CMake/AbseilDll.cmake	2020-11-24 23:14:17.000000000 -0800
+@@ -1,6 +1,93 @@
+ include(CMakeParseArguments)
+ 
+ set(ABSL_INTERNAL_DLL_FILES
++  "random/bernoulli_distribution.h"
++  "random/beta_distribution.h"
++  "random/bit_gen_ref.h"
++  "random/discrete_distribution.cc"
++  "random/discrete_distribution.h"
++  "random/distributions.h"
++  "random/exponential_distribution.h"
++  "random/gaussian_distribution.cc"
++  "random/gaussian_distribution.h"
++  "random/internal/chi_square.cc"
++  "random/internal/chi_square.h"
++  "random/internal/distribution_caller.h"
++  "random/internal/distribution_test_util.cc"
++  "random/internal/distribution_test_util.h"
++  "random/internal/explicit_seed_seq.h"
++  "random/internal/fastmath.h"
++  "random/internal/fast_uniform_bits.h"
++  "random/internal/gaussian_distribution_gentables.cc"
++  "random/internal/generate_real.h"
++  "random/internal/iostream_state_saver.h"
++  "random/internal/mock_helpers.h"
++  "random/internal/mock_overload_set.h"
++  "random/internal/nonsecure_base.h"
++  "random/internal/pcg_engine.h"
++  "random/internal/platform.h"
++  "random/internal/pool_urbg.cc"
++  "random/internal/pool_urbg.h"
++  "random/internal/randen.cc"
++  "random/internal/randen_detect.cc"
++  "random/internal/randen_detect.h"
++  "random/internal/randen_engine.h"
++  "random/internal/randen.h"
++  "random/internal/randen_hwaes.cc"
++  "random/internal/randen_hwaes.h"
++  "random/internal/randen_round_keys.cc"
++  "random/internal/randen_slow.cc"
++  "random/internal/randen_slow.h"
++  "random/internal/randen_traits.h"
++  "random/internal/salted_seed_seq.h"
++  "random/internal/seed_material.cc"
++  "random/internal/seed_material.h"
++  "random/internal/sequence_urbg.h"
++  "random/internal/traits.h"
++  "random/internal/uniform_helper.h"
++  "random/internal/wide_multiply.h"
++  "random/log_uniform_int_distribution.h"
++  "random/mock_distributions.h"
++  "random/mocking_bit_gen.h"
++  "random/poisson_distribution.h"
++  "random/random.h"
++  "random/seed_gen_exception.cc"
++  "random/seed_gen_exception.h"
++  "random/seed_sequences.cc"
++  "random/seed_sequences.h"
++  "random/uniform_int_distribution.h"
++  "random/uniform_real_distribution.h"
++  "random/zipf_distribution.h"
++  "flags/commandlineflag.cc"
++  "flags/commandlineflag.h"
++  "flags/config.h"
++  "flags/declare.h"
++  "flags/flag.cc"
++  "flags/flag.h"
++  "flags/flag_test_defs.cc"
++  "flags/internal/commandlineflag.cc"
++  "flags/internal/commandlineflag.h"
++  "flags/internal/flag.cc"
++  "flags/internal/flag.h"
++  "flags/internal/parse.h"
++  "flags/internal/path_util.h"
++  "flags/internal/private_handle_accessor.cc"
++  "flags/internal/private_handle_accessor.h"
++  "flags/internal/program_name.cc"
++  "flags/internal/program_name.h"
++  "flags/internal/registry.h"
++  "flags/internal/usage.cc"
++  "flags/internal/usage.h"
++  "flags/marshalling.cc"
++  "flags/marshalling.h"
++  "flags/parse.cc"
++  "flags/parse.h"
++  "flags/reflection.cc"
++  "flags/reflection.h"
++  "flags/usage.cc"
++  "flags/usage_config.cc"
++  "flags/usage_config.h"
++  "flags/usage.h"
+   "algorithm/algorithm.h"
+   "algorithm/container.h"
+   "base/attributes.h"
+@@ -126,54 +213,54 @@ set(ABSL_INTERNAL_DLL_FILES
+   "meta/type_traits.h"
+   "numeric/int128.cc"
+   "numeric/int128.h"
+-  "random/bernoulli_distribution.h"
+-  "random/beta_distribution.h"
+-  "random/bit_gen_ref.h"
+-  "random/discrete_distribution.cc"
+-  "random/discrete_distribution.h"
+-  "random/distributions.h"
+-  "random/exponential_distribution.h"
+-  "random/gaussian_distribution.cc"
+-  "random/gaussian_distribution.h"
+-  "random/internal/distribution_caller.h"
+-  "random/internal/fastmath.h"
+-  "random/internal/fast_uniform_bits.h"
+-  "random/internal/generate_real.h"
+-  "random/internal/iostream_state_saver.h"
+-  "random/internal/mock_helpers.h"
+-  "random/internal/nonsecure_base.h"
+-  "random/internal/pcg_engine.h"
+-  "random/internal/platform.h"
+-  "random/internal/pool_urbg.cc"
+-  "random/internal/pool_urbg.h"
+-  "random/internal/randen.cc"
+-  "random/internal/randen.h"
+-  "random/internal/randen_detect.cc"
+-  "random/internal/randen_detect.h"
+-  "random/internal/randen_engine.h"
+-  "random/internal/randen_hwaes.cc"
+-  "random/internal/randen_hwaes.h"
+-  "random/internal/randen_round_keys.cc"
+-  "random/internal/randen_slow.cc"
+-  "random/internal/randen_slow.h"
+-  "random/internal/randen_traits.h"
+-  "random/internal/salted_seed_seq.h"
+-  "random/internal/seed_material.cc"
+-  "random/internal/seed_material.h"
+-  "random/internal/sequence_urbg.h"
+-  "random/internal/traits.h"
+-  "random/internal/uniform_helper.h"
+-  "random/internal/wide_multiply.h"
+-  "random/log_uniform_int_distribution.h"
+-  "random/poisson_distribution.h"
+-  "random/random.h"
+-  "random/seed_gen_exception.cc"
+-  "random/seed_gen_exception.h"
+-  "random/seed_sequences.cc"
+-  "random/seed_sequences.h"
+-  "random/uniform_int_distribution.h"
+-  "random/uniform_real_distribution.h"
+-  "random/zipf_distribution.h"
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
++  
+   "status/internal/status_internal.h"
+   "status/internal/statusor_internal.h"
+   "status/status.h"
+@@ -310,6 +397,22 @@ set(ABSL_INTERNAL_DLL_FILES
+ )
+ 
+ set(ABSL_INTERNAL_DLL_TARGETS
++
++  "strerror"
++  "flags_program_name"
++  "flags_config"
++  "flags_marshalling"
++  "flags_commandlineflag_internal"
++  "flags_commandlineflag"
++  "flags_private_handle_accessor"
++  "flags_reflection"
++  "flags_internal"
++  "flags"
++  "flags_usage_internal"
++  "flags_usage"
++  "flags_parse"
++  "random_internal_distribution_test_util"
++  "statusor"
+   "stacktrace"
+   "symbolize"
+   "examine_stack"
+@@ -460,7 +563,7 @@ function(absl_internal_dll_targets)
+   foreach(dep IN LISTS ABSL_INTERNAL_DLL_DEPS)
+     absl_internal_dll_contains(TARGET ${dep} OUTPUT _contains)
+     if (_contains)
+-      list(APPEND _deps abseil_dll)
++      list(APPEND _deps absl)
+     else()
+       list(APPEND _deps ${dep})
+     endif()
+@@ -473,38 +576,41 @@ endfunction()
+ 
+ function(absl_make_dll)
+   add_library(
+-    abseil_dll
++    absl
+     SHARED
+       "${ABSL_INTERNAL_DLL_FILES}"
+   )
+   target_link_libraries(
+-    abseil_dll
++    absl
+     PRIVATE
+       ${ABSL_DEFAULT_LINKOPTS}
++      $<$<BOOL:${MINGW}>:"advapi32">
++      $<$<BOOL:${MINGW}>:"bcrypt">
++      $<$<BOOL:${MINGW}>:"dbghelp">
+   )
+-  set_property(TARGET abseil_dll PROPERTY LINKER_LANGUAGE "CXX")
++  set_property(TARGET absl PROPERTY LINKER_LANGUAGE "CXX")
+   target_include_directories(
+-    abseil_dll
++    absl
+     PUBLIC
+       "$<BUILD_INTERFACE:${ABSL_COMMON_INCLUDE_DIRS}>"
+       $<INSTALL_INTERFACE:${ABSL_INSTALL_INCLUDEDIR}>
+   )
+ 
+   target_compile_options(
+-    abseil_dll
++    absl
+     PRIVATE
+       ${ABSL_DEFAULT_COPTS}
+   )
+ 
+   target_compile_definitions(
+-    abseil_dll
++    absl
+     PRIVATE
+       ABSL_BUILD_DLL
+       NOMINMAX
+     INTERFACE
+       ${ABSL_CC_LIB_DEFINES}
+   )
+-  install(TARGETS abseil_dll EXPORT ${PROJECT_NAME}Targets
++  install(TARGETS absl EXPORT ${PROJECT_NAME}Targets
+         RUNTIME DESTINATION ${ABSL_INSTALL_BINDIR}
+         LIBRARY DESTINATION ${ABSL_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${ABSL_INSTALL_LIBDIR}
+diff -uprN abseil-cpp-20200923.2-org/CMake/AbseilHelpers.cmake abseil-cpp-20200923.2-new/CMake/AbseilHelpers.cmake
+--- abseil-cpp-20200923.2-org/CMake/AbseilHelpers.cmake	2020-10-21 05:32:42.000000000 -0700
++++ abseil-cpp-20200923.2-new/CMake/AbseilHelpers.cmake	2020-11-24 23:14:17.000000000 -0800
+@@ -227,7 +227,7 @@ function(absl_cc_library)
+       )
+ 
+     if (${_build_type} STREQUAL "dll")
+-        set(ABSL_CC_LIB_DEPS abseil_dll)
++        set(ABSL_CC_LIB_DEPS absl)
+     endif()
+ 
+     target_link_libraries(${_NAME}
+@@ -318,7 +318,7 @@ function(absl_cc_test)
+         GTEST_LINKED_AS_SHARED_LIBRARY=1
+     )
+ 
+-    # Replace dependencies on targets inside the DLL with abseil_dll itself.
++    # Replace dependencies on targets inside the DLL with absl itself.
+     absl_internal_dll_targets(
+       DEPS ${ABSL_CC_TEST_DEPS}
+       OUTPUT ABSL_CC_TEST_DEPS
+diff -uprN abseil-cpp-20200923.2-org/CMakeLists.txt abseil-cpp-20200923.2-new/CMakeLists.txt
+--- abseil-cpp-20200923.2-org/CMakeLists.txt	2020-10-21 05:32:42.000000000 -0700
++++ abseil-cpp-20200923.2-new/CMakeLists.txt	2020-11-24 23:14:17.000000000 -0800
+@@ -42,6 +42,11 @@ if (POLICY CMP0077)
+ endif (POLICY CMP0077)
+ 
+ project(absl CXX)
++if(${MINGW})
++    set(CMAKE_SHARED_LIBRARY_PREFIX "")
++    set(CMAKE_STATIC_LIBRARY_PREFIX "")
++    set(CMAKE_SHARED_MODULE_PREFIX "")
++endif()
+ 
+ # Output directory is correct by default for most build setups. However, when
+ # building Abseil as a DLL, it is important to have the DLL in the same
