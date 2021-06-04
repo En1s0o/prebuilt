@@ -1,5 +1,6 @@
 #!/bin/bash
 
+./build.range-v3.sh
 ./build.spdlog.sh
 ./build.debug.sh
 
@@ -18,6 +19,7 @@
 ./build.grpc.sh
 
 ./build.curl.sh
+./build.cpr.sh
 ./build.hiredis.sh
 ./build.mariadb-connector-c.sh
 ./build.sqlpp11.sh
